@@ -374,7 +374,7 @@ export default function ConverterUI() {
                        <Slider 
                            value={[gridSize]} 
                            min={2} 
-                           max={50} 
+                           max={128} 
                            step={1}
                            onValueChange={(vals) => setGridSize(vals[0])}
                            className="py-4"
