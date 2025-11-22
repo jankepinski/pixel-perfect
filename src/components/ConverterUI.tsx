@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Upload, Download, RefreshCw, Settings, Image as ImageIcon, Wand2, Loader2 } from 'lucide-react';
 import { PixelProcessor, PixelData } from '@/lib/PixelProcessor';
 import { generateImage } from '@/app/actions';
@@ -38,6 +38,7 @@ export default function ConverterUI() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLCanvasElement>(null);
   const gridOverlayRef = useRef<HTMLCanvasElement>(null);
+  const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -50,7 +51,7 @@ export default function ConverterUI() {
       img.onload = () => {
         setOriginalImage(img);
         setGridOffset({ x: 0, y: 0 });
-        processImage(img, true);
+        // processImage will be triggered by useEffect when originalImage changes
       };
       img.src = e.target?.result as string;
     };
@@ -69,7 +70,6 @@ export default function ConverterUI() {
           img.onload = () => {
               setOriginalImage(img);
               setGridOffset({ x: 0, y: 0 });
-              processImage(img, true);
               setIsGenerating(false);
           };
           img.src = base64Image;
@@ -80,34 +80,46 @@ export default function ConverterUI() {
       }
   };
 
-  const processImage = (img: HTMLImageElement, autoDetect: boolean = false) => {
+  const processImage = useCallback((img: HTMLImageElement, autoDetect: boolean = false) => {
+    if (processingTimeoutRef.current) {
+        clearTimeout(processingTimeoutRef.current);
+    }
+
     setIsProcessing(true);
     
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.drawImage(img, 0, 0);
-    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+    // Debounce processing
+    processingTimeoutRef.current = setTimeout(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
 
-    setTimeout(() => {
-      let currentGridSize = gridSize;
-      if (autoDetect) {
-        const detection = PixelProcessor.detectGrid(imageData);
-        currentGridSize = detection.size;
-        setGridSize(currentGridSize);
-      }
+        let currentGridSize = gridSize;
+        if (autoDetect) {
+            const detection = PixelProcessor.detectGrid(imageData);
+            currentGridSize = detection.size;
+            setGridSize(currentGridSize);
+        }
 
-      let pixelData = PixelProcessor.extractPixelArt(imageData, currentGridSize, gridOffset);
-      pixelData = PixelProcessor.removeBackground(pixelData);
-      pixelData = PixelProcessor.trimToContent(pixelData);
-      
-      setProcessedData(pixelData);
-      setIsProcessing(false);
+        let pixelData = PixelProcessor.extractPixelArt(imageData, currentGridSize, gridOffset);
+        pixelData = PixelProcessor.removeBackground(pixelData);
+        pixelData = PixelProcessor.trimToContent(pixelData);
+        
+        setProcessedData(pixelData);
+        setIsProcessing(false);
     }, 100);
-  };
+  }, [gridSize, gridOffset]);
+
+  // Auto-reprocess effect
+  useEffect(() => {
+      if (originalImage && !isDraggingGrid) {
+          processImage(originalImage);
+      }
+  }, [originalImage, gridSize, gridOffset, isDraggingGrid, processImage]);
 
   // Redraw grid overlay
   useEffect(() => {
@@ -218,7 +230,7 @@ export default function ConverterUI() {
 
   const handleGridMouseUp = () => {
       setIsDraggingGrid(false);
-      if (originalImage) processImage(originalImage);
+      // processImage is triggered by useEffect when isDraggingGrid changes to false
   };
 
   return (
@@ -362,7 +374,7 @@ export default function ConverterUI() {
                        <Slider 
                            value={[gridSize]} 
                            min={2} 
-                           max={128} 
+                           max={50} 
                            step={1}
                            onValueChange={(vals) => setGridSize(vals[0])}
                            className="py-4"
@@ -462,15 +474,6 @@ export default function ConverterUI() {
                            </div>
                        </div>
                    </div>
-
-                   <Button 
-                       onClick={() => processImage(originalImage)}
-                       disabled={isProcessing}
-                       className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-                   >
-                       {isProcessing ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                       Reprocess
-                   </Button>
                </CardContent>
             </Card>
           </div>
