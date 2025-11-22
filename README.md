@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pixel Perfect 👾
 
-## Getting Started
+**AI-Powered Pixel Art Converter & Generator**
 
-First, run the development server:
+Pixel Perfect is a modern web application that generates and refines pixel art sprites using AI. It combines the power of Google's Gemini 3 Pro model with specialized image processing algorithms to create authentic, game-ready assets.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **AI Generation**: Generate pixel art from text prompts using the advanced **Gemini 3 Pro** model.
+- **Smart Processing**:
+  - **Grid Detection**: Automatically detects the pixel grid size.
+  - **Background Removal**: Instantly removes white/solid backgrounds.
+  - **Smart Cropping**: Trims the image to the content bounding box.
+- **Resolution Control**: Choose from **8x8**, **16x16**, **32x32**, or **64x64** presets.
+- **Interactive Editor**:
+  - Drag-and-drop upload.
+  - Visual grid overlay with toggle.
+  - Fine-tune grid offset (X/Y) with sliders (mobile-friendly) or inputs (desktop).
+  - Real-time preview.
+- **Production Ready**: Exports clean, 1:1 resolution PNGs ready for game engines.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **AI**: [Google Gemini API](https://ai.google.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-## Learn More
+## 🚀 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Node.js 18+
+- A Google Gemini API Key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation
 
-## Deploy on Vercel
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/jankepinski/pixel-perfect.git
+   cd pixel-perfect
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Configure Environment**
+   Create a `.env.local` file in the root directory and add your API key:
+   ```env
+   GOOGLE_API_KEY=your_api_key_here
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## 🎮 Usage
+
+1. **Generate**: Enter a prompt (e.g., "A fire wizard casting a spell"), select a resolution, and click **Generate**.
+2. **Refine**:
+   - Use the **Grid Size** slider to match the pixel density.
+   - Toggle **Always Show Grid** to visualize alignment.
+   - Adjust **Grid Offset** if the pixels aren't perfectly aligned.
+3. **Download**: Click **Download Pixel Art** to save your sprite.
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
